@@ -8,10 +8,11 @@ from sys import executable
 from datetime import datetime
 import pytz
 import time
+import threading
 
 from telegram import ParseMode, BotCommand
 from telegram.ext import CommandHandler
-from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL
+from bot import bot, dispatcher, updater, botStartTime, IMAGE_URL, GROUP_ID, IGNORE_PENDING_REQUESTS
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *
@@ -20,7 +21,7 @@ from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, anime, stickers, search, delete, speedtest, usage, mediainfo, count
 
-now=datetime.now(pytz.timezone('Asia/Jakarta'))
+now=datetime.now(pytz.timezone('Asia/Calcutta'))
 
 
 def stats(update, context):
@@ -53,10 +54,6 @@ def start(update, context):
 This bot can mirror all your links to Google Drive!
 Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
-    buttons = button_build.ButtonMaker()
-    buttons.buildbutton("Repo", "https://github.com/breakdowns/slam-mirrorbot")
-    buttons.buildbutton("Support Group", "https://t.me/SlamMirrorSupport")
-    reply_markup = InlineKeyboardMarkup(buttons.build_menu(2))
     LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id, update.message.chat.username, update.message.text))
     if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
         if update.message.chat.type == "private" :
@@ -83,6 +80,7 @@ def ping(update, context):
     reply = sendMessage("Starting Ping", context.bot, update)
     end_time = int(round(time.time() * 1000))
     editMessage(f'{end_time - start_time} ms', reply)
+    threading.Thread(target=auto_delete_message, args=(context.bot, update.message, reply)).start()
 
 
 def log(update, context):
@@ -176,15 +174,13 @@ def bot_help(update, context):
 /tshelp: Get help for Torrent search module.
 
 /weebhelp: Get help for Anime, Manga, and Character module.
-
-/stickerhelp: Get help for Stickers module.
 '''
 
     if CustomFilters.sudo_user(update) or CustomFilters.owner_filter(update):
-        sendMessage(help_string_adm, context.bot, update)
+        reply_message = sendMessage(help_string_adm, context.bot, update)
     else:
-        sendMessage(help_string, context.bot, update)
-
+        reply_message = sendMessage(help_string, context.bot, update)
+    threading.Thread(target=auto_delete_message, args=(context.bot, update.message, reply_message)).start()
 
 botcmds = [
 BotCommand(f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
@@ -194,16 +190,9 @@ BotCommand(f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
 BotCommand(f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
 BotCommand(f'{BotCommands.WatchCommand}','Mirror YT-DL support link'),
 BotCommand(f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as tar'),
-BotCommand(f'{BotCommands.CancelMirror}','Cancel a task'),
-BotCommand(f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
 BotCommand(f'{BotCommands.DeleteCommand}','Delete file from Drive'),
 BotCommand(f'{BotCommands.ListCommand}',' [query] Searches files in Drive'),
-BotCommand(f'{BotCommands.StatusCommand}','Get Mirror Status message'),
-BotCommand(f'{BotCommands.StatsCommand}','Bot Usage Stats'),
-BotCommand(f'{BotCommands.HelpCommand}','Get Detailed Help'),
-BotCommand(f'{BotCommands.SpeedCommand}','Check Speed of the host'),
-BotCommand(f'{BotCommands.LogCommand}','Bot Log [owner/sudo only]'),
-BotCommand(f'{BotCommands.RestartCommand}','Restart bot [owner/sudo only]')]
+BotCommand(f'{BotCommands.StatusCommand}','Get Mirror Status message')]
 
 
 def main():
@@ -214,6 +203,13 @@ def main():
             chat_id, msg_id = map(int, f)
         bot.edit_message_text("Restarted successfully!", chat_id, msg_id)
         os.remove(".restartmsg")
+    if GROUP_ID is not None and isinstance(GROUP_ID, str):
+        try:
+            dispatcher.bot.sendMessage(f"{GROUP_ID}", "Bot Restarted")
+        except Unauthorized:
+            LOGGER.warning("Bot isnt able to send message to support_chat, go and check!")
+        except BadRequest as e:
+            LOGGER.warning(e.message)
     bot.set_my_commands(botcmds)
 
     start_handler = CommandHandler(BotCommands.StartCommand, start, run_async=True)
@@ -232,7 +228,7 @@ def main():
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
-    updater.start_polling()
+    updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
     LOGGER.info("Bot Started!")
     signal.signal(signal.SIGINT, fs_utils.exit_clean_up)
 

@@ -133,7 +133,7 @@ class MirrorListener(listeners.MirrorListeners):
             uname = f"@{self.message.from_user.username}"
         else:
             uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
-        msg = f"{uname} your download has been stopped due to: {error}"
+        msg = f"Hey {uname} your download has been stopped...\n<b>Reason :</b> <code>{error}</code>\n<b>#DownloadStopped</b>"
         sendMessage(msg, self.bot, self.update)
         if count == 0:
             self.clean()
@@ -150,17 +150,17 @@ class MirrorListener(listeners.MirrorListeners):
         with download_dict_lock:
             msg = f'<b>Filename: </b><code>{download_dict[self.uid].name()}</code>\n<b>Size: </b><code>{size}</code>'
             if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
-                msg += '\n<b>Type: </b><code>Folder</code>'
-                msg += f'\n<b>SubFolders: </b><code>{folders}</code>'
-                msg += f'\n<b>Files: </b><code>{files}</code>'
+                msg += '\n\n<b>Type: </b>Folder'
+                msg += f'   <b>SubFolders: </b>{folders}'
+                msg += f'   <b>Files: </b>{files}'
             else:
-                msg += f'\n<b>Type: </b><code>{typ}</code>'
+                msg += f'\n\n<b>Type: </b>{typ}'
             buttons = button_build.ButtonMaker()
             if SHORTENER is not None and SHORTENER_API is not None:
                 surl = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={link}&format=text').text
-                buttons.buildbutton("☁️ Drive Link", surl)
+                buttons.buildbutton("☁ Drive Link", surl)
             else:
-                buttons.buildbutton("☁️ Drive Link", link)
+                buttons.buildbutton("☁ Drive Link", link)
             LOGGER.info(f'Done Uploading {download_dict[self.uid].name()}')
             if INDEX_URL is not None:
                 url_path = requests.utils.quote(f'{download_dict[self.uid].name()}')
@@ -169,19 +169,19 @@ class MirrorListener(listeners.MirrorListeners):
                     share_url += '/'
                     if SHORTENER is not None and SHORTENER_API is not None:
                         siurl = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={share_url}&format=text').text
-                        buttons.buildbutton("⚡ Index Link", siurl)
+                        buttons.buildbutton("ℹ Index Link", siurl)
                     else:
-                        buttons.buildbutton("⚡ Index Link", share_url)
+                        buttons.buildbutton("ℹ Index Link", share_url)
                 else:
                     share_urls = f'{INDEX_URL}/{url_path}?a=view'
                     if SHORTENER is not None and SHORTENER_API is not None:
                         siurl = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={share_url}&format=text').text
                         siurls = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={share_urls}&format=text').text
-                        buttons.buildbutton("⚡ Index Link", siurl)
+                        buttons.buildbutton("ℹ Index Link", siurl)
                         if VIEW_LINK:
                             buttons.buildbutton("🌐 View Link", siurls)
                     else:
-                        buttons.buildbutton("⚡ Index Link", share_url)
+                        buttons.buildbutton("ℹ Index Link", share_url)
                         if VIEW_LINK:
                             buttons.buildbutton("🌐 View Link", share_urls)
             if BUTTON_FOUR_NAME is not None and BUTTON_FOUR_URL is not None:
@@ -190,12 +190,8 @@ class MirrorListener(listeners.MirrorListeners):
                 buttons.buildbutton(f"{BUTTON_FIVE_NAME}", f"{BUTTON_FIVE_URL}")
             if BUTTON_SIX_NAME is not None and BUTTON_SIX_URL is not None:
                 buttons.buildbutton(f"{BUTTON_SIX_NAME}", f"{BUTTON_SIX_URL}")
-            if self.message.from_user.username:
-                uname = f"@{self.message.from_user.username}"
-            else:
-                uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
-            if uname is not None:
-                msg += f'\n\ncc: {uname}'
+            if self.tag is not None:
+                msg += f'\n\ncc: @{self.tag}'
             try:
                 fs_utils.clean_download(download_dict[self.uid].path())
             except FileNotFoundError:

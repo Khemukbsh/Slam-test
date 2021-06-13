@@ -4,6 +4,7 @@ from bot import dispatcher, AUTHORIZED_CHATS
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from telegram import Update, ParseMode
 from telegram.ext import Filters, CommandHandler
+import threading
 
 
 def speedtest(update, context):
@@ -30,9 +31,10 @@ def speedtest(update, context):
 '''
     ed_msg.delete()
     try:
-        update.effective_message.reply_photo(path, string_speed, parse_mode=ParseMode.HTML)
+        reply = update.effective_message.reply_photo(path, string_speed, parse_mode=ParseMode.HTML)
     except:
-        update.effective_message.reply_text(string_speed, parse_mode=ParseMode.HTML)
+        reply = update.effective_message.reply_text(string_speed, parse_mode=ParseMode.HTML)
+    threading.Thread(target=auto_delete_message, args=(context.bot, update.message, reply)).start()    
 
 def speed_convert(size):
     """Hi human, you can't read bytes?"""

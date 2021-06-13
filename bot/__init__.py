@@ -68,6 +68,7 @@ aria2 = aria2p.API(
 
 DOWNLOAD_DIR = None
 BOT_TOKEN = None
+GROUP_ID = None
 
 download_dict_lock = threading.Lock()
 status_reply_dict_lock = threading.Lock()
@@ -100,6 +101,7 @@ try:
     AUTO_DELETE_MESSAGE_DURATION = int(getConfig('AUTO_DELETE_MESSAGE_DURATION'))
     TELEGRAM_API = getConfig('TELEGRAM_API')
     TELEGRAM_HASH = getConfig('TELEGRAM_HASH')
+    GROUP_ID = getConfig("GROUP_ID")
 except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)
@@ -159,17 +161,11 @@ except KeyError:
     logging.warning('HEROKU APP NAME not provided!')
     HEROKU_APP_NAME = None
 try:
-    MAX_TORRENT_SIZE = int(getConfig("MAX_TORRENT_SIZE"))
+    TORRENT_DIRECT_LIMIT = getConfig('TORRENT_DIRECT_LIMIT')
+    if len(TORRENT_DIRECT_LIMIT) == 0:
+        TORRENT_DIRECT_LIMIT = None
 except KeyError:
-    MAX_TORRENT_SIZE = None
-try:
-   ENABLE_FILESIZE_LIMIT = getConfig('ENABLE_FILESIZE_LIMIT')
-   if ENABLE_FILESIZE_LIMIT.lower() == 'true':
-       ENABLE_FILESIZE_LIMIT = True
-   else:
-       ENABLE_FILESIZE_LIMIT = False
-except KeyError:
-    ENABLE_FILESIZE_LIMIT = False
+    TORRENT_DIRECT_LIMIT = None
 try:
     UPTOBOX_TOKEN = getConfig('UPTOBOX_TOKEN')
 except KeyError:
@@ -292,9 +288,9 @@ except KeyError:
 try:
     IMAGE_URL = getConfig('IMAGE_URL')
     if len(IMAGE_URL) == 0:
-        IMAGE_URL = 'https://telegra.ph/file/db03910496f06094f1f7a.jpg'
+        IMAGE_URL = None
 except KeyError:
-    IMAGE_URL = 'https://telegra.ph/file/db03910496f06094f1f7a.jpg'
+    IMAGE_URL = None
 
 
 updater = tg.Updater(token=BOT_TOKEN)
