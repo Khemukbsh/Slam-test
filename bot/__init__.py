@@ -292,6 +292,12 @@ try:
 except KeyError:
     IMAGE_URL = None
 
+IGNORE_PENDING_REQUESTS = False
+try:
+    if getConfig("IGNORE_PENDING_REQUESTS").lower() == "true":
+        IGNORE_PENDING_REQUESTS = True
+except KeyError:
+    pass
 
 updater = tg.Updater(token=BOT_TOKEN)
 bot = updater.bot
