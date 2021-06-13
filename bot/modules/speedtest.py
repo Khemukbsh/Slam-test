@@ -4,6 +4,7 @@ from bot import dispatcher, AUTHORIZED_CHATS
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from telegram import Update, ParseMode
 from telegram.ext import Filters, CommandHandler
+from bot.helper.telegram_helper.message_utils import auto_delete_message
 import threading
 
 
