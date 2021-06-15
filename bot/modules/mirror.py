@@ -133,7 +133,7 @@ class MirrorListener(listeners.MirrorListeners):
             uname = f"@{self.message.from_user.username}"
         else:
             uname = f'<a href="tg://user?id={self.message.from_user.id}">{self.message.from_user.first_name}</a>'
-        msg = f"Hey {uname} your download has been stopped...\n<b>Reason :</b> <code>{error}</code>\n<b>#DownloadStopped</b>"
+        msg = f"Hey {uname} your download has been stopped...\n<b>Reason :</b> {error}\n<b>#DownloadStopped</b>"
         sendMessage(msg, self.bot, self.update)
         if count == 0:
             self.clean()
@@ -158,9 +158,9 @@ class MirrorListener(listeners.MirrorListeners):
             buttons = button_build.ButtonMaker()
             if SHORTENER is not None and SHORTENER_API is not None:
                 surl = requests.get(f'https://{SHORTENER}/api?api={SHORTENER_API}&url={link}&format=text').text
-                buttons.buildbutton("☁ Drive Link", surl)
+                buttons.buildbutton("☁️ Drive Link", surl)
             else:
-                buttons.buildbutton("☁ Drive Link", link)
+                buttons.buildbutton("☁️ Drive Link", link)
             LOGGER.info(f'Done Uploading {download_dict[self.uid].name()}')
             if INDEX_URL is not None:
                 url_path = requests.utils.quote(f'{download_dict[self.uid].name()}')
@@ -284,6 +284,15 @@ def _mirror(bot, update, isTar=False, extract=False):
         link = direct_link_generator(link)
     except DirectDownloadLinkException as e:
         LOGGER.info(f'{link}: {e}')
+        if "ERROR:" in str(e):
+            sendMessage(f"{e}", bot, update)
+            return
+        if "G-Drive" in str(e):
+            sendMessage(f"ERROR: {e}", bot, update)
+            return
+        if "Youtube" in str(e):
+            sendMessage(f"ERROR: {e}", bot, update)
+            return
     listener = MirrorListener(bot, update, pswd, isTar, tag, extract)
     if bot_utils.is_mega_link(link):
         link_type = get_mega_link_type(link)

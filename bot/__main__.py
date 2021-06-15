@@ -19,7 +19,7 @@ from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
-from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, anime, stickers, search, delete, speedtest, usage, mediainfo, count
+from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, search, delete, speedtest, usage, mediainfo, count
 
 now=datetime.now(pytz.timezone('Asia/Calcutta'))
 
@@ -55,9 +55,10 @@ This bot can mirror all your links to Google Drive!
 Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
     LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id, update.message.chat.username, update.message.text))
+    uptime = get_readable_time(time.time() - botStartTime)
     if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
         if update.message.chat.type == "private" :
-            sendMessage(f"Hey I'm Alive 🙂", context.bot, update)
+            sendMessage(f"Hey I'm Alive 🙂\nSince: {uptime}", context.bot, update)
         else :
             update.effective_message.reply_photo(IMAGE_URL, start_string, parse_mode=ParseMode.MARKDOWN, reply_markup=reply_markup)
     else :
@@ -136,10 +137,6 @@ def bot_help(update, context):
 /mediainfo: Get detailed info about replied media (Only for Telegram file).
 
 /tshelp: Get help for Torrent search module.
-
-/weebhelp: Get help for Anime, Manga, and Character module.
-
-/stickerhelp: Get help for Stickers module.
 '''
 
     help_string = f'''
@@ -172,8 +169,6 @@ def bot_help(update, context):
 /mediainfo: Get detailed info about replied media (Only for Telegram file).
 
 /tshelp: Get help for Torrent search module.
-
-/weebhelp: Get help for Anime, Manga, and Character module.
 '''
 
     if CustomFilters.sudo_user(update) or CustomFilters.owner_filter(update):
@@ -204,8 +199,9 @@ def main():
         bot.edit_message_text("Restarted successfully!", chat_id, msg_id)
         os.remove(".restartmsg")
     if GROUP_ID is not None and isinstance(GROUP_ID, str):
+    restarttime = now.strftime('%Y/%m/%d %I:%M:%S %p')
         try:
-            dispatcher.bot.sendMessage(f"{GROUP_ID}", "Bot Restarted")
+            dispatcher.bot.sendMessage(f"{GROUP_ID}", "Bot Restarted at {restarttime}")
         except Unauthorized:
             LOGGER.warning("Bot isnt able to send message to support_chat, go and check!")
         except BadRequest as e:
