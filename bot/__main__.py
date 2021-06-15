@@ -199,9 +199,8 @@ def main():
         bot.edit_message_text("Restarted successfully!", chat_id, msg_id)
         os.remove(".restartmsg")
     if GROUP_ID is not None and isinstance(GROUP_ID, str):
-    restarttime = now.strftime('%Y/%m/%d %I:%M:%S %p')
         try:
-            dispatcher.bot.sendMessage(f"{GROUP_ID}", "Bot Restarted at {restarttime}")
+            dispatcher.bot.sendMessage(f"{GROUP_ID}", "Bot Restarted")
         except Unauthorized:
             LOGGER.warning("Bot isnt able to send message to support_chat, go and check!")
         except BadRequest as e:
