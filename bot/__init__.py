@@ -102,6 +102,8 @@ try:
     TELEGRAM_API = getConfig('TELEGRAM_API')
     TELEGRAM_HASH = getConfig('TELEGRAM_HASH')
     GROUP_ID = getConfig("GROUP_ID")
+    UPSTREAM_REPO = getConfig('UPSTREAM_REPO')
+    UPSTREAM_BRANCH = getConfig('UPSTREAM_BRANCH')
 except KeyError as e:
     LOGGER.error("One or more env variables missing! Exiting now")
     exit(1)
@@ -139,7 +141,7 @@ telegraph_token = telegraph.get_access_token()
 try:
     MEGA_API_KEY = getConfig('MEGA_API_KEY')
 except KeyError:
-    logging.warning('MEGA API KEY not provided!')
+    logging.info('MEGA API KEY not provided!')
     MEGA_API_KEY = None
 try:
     MEGA_EMAIL_ID = getConfig('MEGA_EMAIL_ID')
@@ -147,25 +149,19 @@ try:
     if len(MEGA_EMAIL_ID) == 0 or len(MEGA_PASSWORD) == 0:
         raise KeyError
 except KeyError:
-    logging.warning('MEGA Credentials not provided!')
+    logging.info('MEGA Credentials not provided!')
     MEGA_EMAIL_ID = None
     MEGA_PASSWORD = None
 try:
     HEROKU_API_KEY = getConfig('HEROKU_API_KEY')
 except KeyError:
-    logging.warning('HEROKU API KEY not provided!')
+    logging.info('HEROKU API KEY not provided!')
     HEROKU_API_KEY = None
 try:
     HEROKU_APP_NAME = getConfig('HEROKU_APP_NAME')
 except KeyError:
-    logging.warning('HEROKU APP NAME not provided!')
+    logging.info('HEROKU APP NAME not provided!')
     HEROKU_APP_NAME = None
-try:
-    TORRENT_DIRECT_LIMIT = getConfig('TORRENT_DIRECT_LIMIT')
-    if len(TORRENT_DIRECT_LIMIT) == 0:
-        TORRENT_DIRECT_LIMIT = None
-except KeyError:
-    TORRENT_DIRECT_LIMIT = None
 try:
     UPTOBOX_TOKEN = getConfig('UPTOBOX_TOKEN')
 except KeyError:
@@ -177,6 +173,12 @@ try:
         INDEX_URL = None
 except KeyError:
     INDEX_URL = None
+try:
+    TORRENT_DIRECT_LIMIT = getConfig('TORRENT_DIRECT_LIMIT')
+    if len(TORRENT_DIRECT_LIMIT) == 0:
+        TORRENT_DIRECT_LIMIT = None
+except KeyError:
+    TORRENT_DIRECT_LIMIT = None
 try:
     CLONE_LIMIT = getConfig('CLONE_LIMIT')
     if len(CLONE_LIMIT) == 0:

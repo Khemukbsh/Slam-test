@@ -19,7 +19,7 @@ from bot.helper.telegram_helper.message_utils import *
 from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_time
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
-from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, search, delete, speedtest, usage, mediainfo, count
+from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, search, delete, speedtest, usage, mediainfo, count, config, updates
 
 now=datetime.now(pytz.timezone('Asia/Calcutta'))
 
@@ -43,8 +43,8 @@ def stats(update, context):
             f'<b>Free:</b> {free}\n\n' \
             f'📊Data Usage📊\n<b>Upload:</b> {sent}\n' \
             f'<b>Download:</b> {recv}\n\n' \
-            f'<b>CPU:</b> {cpuUsage}%\n' \
-            f'<b>RAM:</b> {memory}%\n' \
+            f'<b>CPU:</b> {cpuUsage}% ' \
+            f'<b>RAM:</b> {memory}% ' \
             f'<b>DISK:</b> {disk}%'
     update.effective_message.reply_photo(IMAGE_URL, stats, parse_mode=ParseMode.HTML)
 
@@ -67,7 +67,6 @@ Type /{BotCommands.HelpCommand} to get a list of available commands
 
 def restart(update, context):
     restart_message = sendMessage("Restarting, Please wait!", context.bot, update)
-    LOGGER.info(f'Restarting the Bot...')
     # Save restart message object in order to reply to it after restarting
     with open(".restartmsg", "w") as f:
         f.truncate(0)
@@ -128,13 +127,17 @@ def bot_help(update, context):
 
 /{BotCommands.LogCommand}: Get a log file of the bot. Handy for getting crash reports
 
+/{BotCommands.ConfigMenuCommand}: Get Info Menu about bot config (Owner Only).
+
+/{BotCommands.UpdateCommand}: Update Bot from Upstream Repo. (Owner Only).
+
 /{BotCommands.UsageCommand}: To see Heroku Dyno Stats (Owner & Sudo only).
 
 /{BotCommands.SpeedCommand}: Check Internet Speed of the Host
 
-/shell: Run commands in Shell (Terminal).
+/{BotCommands.MediaInfoCommand}: Get detailed info about replied media (Only for Telegram file).
 
-/mediainfo: Get detailed info about replied media (Only for Telegram file).
+/{BotCommands.ShellCommand}: Run commands in Shell (Terminal).
 
 /tshelp: Get help for Torrent search module.
 '''
@@ -166,7 +169,7 @@ def bot_help(update, context):
 
 /{BotCommands.SpeedCommand}: Check Internet Speed of the Host
 
-/mediainfo: Get detailed info about replied media (Only for Telegram file).
+/{BotCommands.MediaInfoCommand}: Get detailed info about replied media (Only for Telegram file).
 
 /tshelp: Get help for Torrent search module.
 '''
