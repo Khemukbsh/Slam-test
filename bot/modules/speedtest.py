@@ -23,19 +23,20 @@ def speedtest(update, context):
 <b>Name:</b> <code>{result['server']['name']}</code>
 <b>Country:</b> <code>{result['server']['country']}, {result['server']['cc']}</code>
 <b>Sponsor:</b> <code>{result['server']['sponsor']}</code>
-    
+<b>ISP:</b> <code>{result['client']['isp']}</code>
+
 <b>SpeedTest Results</b>
 <b>Upload:</b> <code>{speed_convert(result['upload'] / 8)}</code>
 <b>Download:</b>  <code>{speed_convert(result['download'] / 8)}</code>
 <b>Ping:</b> <code>{result['ping']} ms</code>
-<b>ISP:</b> <code>{result['client']['isp']}</code>
+<b>ISP Rating:</b> <code>{result['client']['isprating']}</code>
 '''
     ed_msg.delete()
     try:
         reply = update.effective_message.reply_photo(path, string_speed, parse_mode=ParseMode.HTML)
     except:
         reply = update.effective_message.reply_text(string_speed, parse_mode=ParseMode.HTML)
-    threading.Thread(target=auto_delete_message, args=(context.bot, update.message, reply)).start()    
+    threading.Thread(target=auto_delete_message, args=(context.bot, update.message, reply)).start()
 
 def speed_convert(size):
     """Hi human, you can't read bytes?"""
